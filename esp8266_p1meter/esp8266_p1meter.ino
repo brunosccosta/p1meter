@@ -77,7 +77,18 @@ void send_data_to_broker() {
     serializeJson(doc, buffer);
 
     webSocket.broadcastTXT(buffer);
-    client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
+    bool result = client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
+
+    String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
+    webSocket.broadcastTXT(debug);
+}
+
+void send_heartbeat_to_broker() {
+    webSocket.broadcastTXT("Sending heartbeat to broker\n");
+    bool result = client.publish(AWS_IOT_HEARTBEAT_TOPIC, "1");
+
+    String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
+    webSocket.broadcastTXT(debug);
 }
 
 // **********************************
@@ -327,6 +338,8 @@ void setup()
     BearSSL::PrivateKey *key = new BearSSL::PrivateKey(AWS_CERT_PRIVATE);
     net.setClientRSACert(client_crt, key);
 
+    net.setTimeout(120);
+
     // Connect to the MQTT broker on the AWS endpoint we defined earlier
     client.begin(AWS_IOT_ENDPOINT, 8883, net);
 
@@ -369,5 +382,10 @@ void loop()
     if (now - LAST_UPDATE_SENT > UPDATE_INTERVAL) {
         send_data_to_broker();
         LAST_UPDATE_SENT = millis();
+    }
+
+    if (now - LAST_HEARTBEAT_SENT > MQTT_HEARTBEAT) {
+        send_heartbeat_to_broker();
+        LAST_HEARTBEAT_SENT = millis();
     }
 }

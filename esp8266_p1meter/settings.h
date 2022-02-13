@@ -11,10 +11,15 @@
 // * Wifi timeout in milliseconds
 #define WIFI_TIMEOUT 30000
 
+// * Heartbeat in milliseconds
+#define MQTT_HEARTBEAT 10000
+
 // * AWS root topic
-#define AWS_IOT_PUBLISH_TOPIC "p1meter/pub"
+#define AWS_IOT_HEARTBEAT_TOPIC "p1meter/alive"
+#define AWS_IOT_PUBLISH_TOPIC "p1meter/data"
 
 long LAST_UPDATE_SENT = 0;
+long LAST_HEARTBEAT_SENT = 0;
 
 // * Set to store the data values read
 float CONSUMPTION_LOW_TARIF;
