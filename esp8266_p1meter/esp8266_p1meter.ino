@@ -1,27 +1,27 @@
 #include <Arduino.h>
 
 #include <Ticker.h>
+#include <time.h>
+#include <ArduinoJson.h>
 
-#include <PubSubClient.h>
-
+#include <WiFiManager.h>
 #include <ESP8266WiFi.h>
-#include <WebSocketsServer.h>   //https://github.com/Links2004/arduinoWebSockets/tree/async
-#include <Hash.h>
 
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h> 
+#include <WebSocketsServer.h>   //https://github.com/Links2004/arduinoWebSockets/tree/async
+
+#include <MQTTClient.h>
 
 #include "settings.h"
+#include "secrets.h"
 
 // * Initiate led blinker library
 Ticker ticker;
 
 // * Initiate WIFI client
-WiFiClient espClient;
+WiFiClientSecure net = WiFiClientSecure();
 
 // * Initiate MQTT client
-PubSubClient mqtt_client(espClient);
+MQTTClient client = MQTTClient(1024);
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -43,106 +43,41 @@ void tick()
 // * MQTT                           *
 // **********************************
 
-// * Send a message to a broker topic
-void send_mqtt_message(const char *topic, char *payload)
-{
-    Serial.printf("MQTT Outgoing on %s: ", topic);
-    Serial.println(payload);
+void send_data_to_broker() {
+    Serial.println("Will send data to broker");
 
-    bool result = mqtt_client.publish(topic, payload, false);
+    StaticJsonDocument<350> doc;
 
-    if (!result)
-    {
-        Serial.printf("MQTT publish to topic %s failed\n", topic);
-    }
-}
+    doc["consumption_low_tarif"] = CONSUMPTION_LOW_TARIF;
+    doc["consumption_high_tarif"] = CONSUMPTION_HIGH_TARIF;
+    doc["returndelivery_low_tarif"] = RETURNDELIVERY_LOW_TARIF;
+    doc["returndelivery_high_tarif"] = RETURNDELIVERY_HIGH_TARIF;
+    doc["actual_consumption"] = ACTUAL_CONSUMPTION;
+    doc["actual_returndelivery"] = ACTUAL_RETURNDELIVERY;
 
-// * Reconnect to MQTT server and subscribe to in and out topics
-bool mqtt_reconnect()
-{
-    // * Loop until we're reconnected
-    int MQTT_RECONNECT_RETRIES = 0;
+    doc["l1_instant_power_usage"] = L1_INSTANT_POWER_USAGE;
+    doc["l2_instant_power_usage"] = L2_INSTANT_POWER_USAGE;
+    doc["l3_instant_power_usage"] = L3_INSTANT_POWER_USAGE;
+    doc["l1_instant_power_current"] = L1_INSTANT_POWER_CURRENT;
+    doc["l2_instant_power_current"] = L2_INSTANT_POWER_CURRENT;
+    doc["l3_instant_power_current"] = L3_INSTANT_POWER_CURRENT;
+    doc["l1_voltage"] = L1_VOLTAGE;
+    doc["l2_voltage"] = L2_VOLTAGE;
+    doc["l3_voltage"] = L3_VOLTAGE;
 
-    while (!mqtt_client.connected() && MQTT_RECONNECT_RETRIES < MQTT_MAX_RECONNECT_TRIES)
-    {
-        MQTT_RECONNECT_RETRIES++;
-        Serial.printf("MQTT connection attempt %d / %d ...\n", MQTT_RECONNECT_RETRIES, MQTT_MAX_RECONNECT_TRIES);
+    doc["gas_meter_m3"] = GAS_METER_M3;
 
-        // * Attempt to connect
-        if (mqtt_client.connect(HOSTNAME))
-        {
-            Serial.println(F("MQTT connected!"));
+    doc["actual_tarif_group"] = ACTUAL_TARIF;
+    doc["short_power_outages"] = SHORT_POWER_OUTAGES;
+    doc["long_power_outages"] = LONG_POWER_OUTAGES;
+    doc["short_power_drops"] = SHORT_POWER_DROPS;
+    doc["short_power_peaks"] = SHORT_POWER_PEAKS;
 
-            // * Once connected, publish an announcement...
-            char *message = new char[16 + strlen(HOSTNAME) + 1];
-            strcpy(message, "p1 meter alive: ");
-            strcat(message, HOSTNAME);
-            mqtt_client.publish("hass/status", message);
+    String buffer;
+    serializeJson(doc, buffer);
 
-            Serial.printf("MQTT root topic: %s\n", MQTT_ROOT_TOPIC);
-        }
-        else
-        {
-            Serial.print(F("MQTT Connection failed: rc="));
-            Serial.println(mqtt_client.state());
-            Serial.println(F(" Retrying in 5 seconds"));
-            Serial.println("");
-
-            // * Wait 5 seconds before retrying
-            delay(5000);
-        }
-    }
-
-    if (MQTT_RECONNECT_RETRIES >= MQTT_MAX_RECONNECT_TRIES)
-    {
-        Serial.printf("*** MQTT connection failed, giving up after %d tries ...\n", MQTT_RECONNECT_RETRIES);
-        return false;
-    }
-
-    return true;
-}
-
-void send_metric(String name, float metric)
-{
-    Serial.print(F("Sending metric to broker: "));
-    Serial.print(name);
-    Serial.print(F("="));
-    Serial.println(metric);
-
-    String data = name + "=" + String(metric) + "\n";
-
-    webSocket.broadcastTXT(data);
-
-    //String topic = String(MQTT_ROOT_TOPIC) + "/" + name;
-    //send_mqtt_message(topic.c_str(), output);
-}
-
-void send_data_to_broker()
-{
-    send_metric("consumption_low_tarif", CONSUMPTION_LOW_TARIF);
-    send_metric("consumption_high_tarif", CONSUMPTION_HIGH_TARIF);
-    send_metric("returndelivery_low_tarif", RETURNDELIVERY_LOW_TARIF);
-    send_metric("returndelivery_high_tarif", RETURNDELIVERY_HIGH_TARIF);
-    send_metric("actual_consumption", ACTUAL_CONSUMPTION);
-    send_metric("actual_returndelivery", ACTUAL_RETURNDELIVERY);
-
-    send_metric("l1_instant_power_usage", L1_INSTANT_POWER_USAGE);
-    send_metric("l2_instant_power_usage", L2_INSTANT_POWER_USAGE);
-    send_metric("l3_instant_power_usage", L3_INSTANT_POWER_USAGE);
-    send_metric("l1_instant_power_current", L1_INSTANT_POWER_CURRENT);
-    send_metric("l2_instant_power_current", L2_INSTANT_POWER_CURRENT);
-    send_metric("l3_instant_power_current", L3_INSTANT_POWER_CURRENT);
-    send_metric("l1_voltage", L1_VOLTAGE);
-    send_metric("l2_voltage", L2_VOLTAGE);
-    send_metric("l3_voltage", L3_VOLTAGE);
-    
-    send_metric("gas_meter_m3", GAS_METER_M3);
-
-    send_metric("actual_tarif_group", ACTUAL_TARIF);
-    send_metric("short_power_outages", SHORT_POWER_OUTAGES);
-    send_metric("long_power_outages", LONG_POWER_OUTAGES);
-    send_metric("short_power_drops", SHORT_POWER_DROPS);
-    send_metric("short_power_peaks", SHORT_POWER_PEAKS);
+    webSocket.broadcastTXT(buffer);
+    client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
 }
 
 // **********************************
@@ -331,6 +266,24 @@ void read_p1_hardwareserial()
 // * Setup Main                     *
 // **********************************
 
+void setClock()
+{
+    configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+
+    Serial.print("Waiting for NTP time sync: ");
+    time_t now = time(nullptr);
+    while (now < 8 * 3600 * 2) {
+        delay(500);
+        Serial.print(".");
+        now = time(nullptr);
+    }
+    Serial.println("");
+    struct tm timeinfo;
+    gmtime_r(&now, &timeinfo);
+    Serial.print("Current time: ");
+    Serial.print(asctime(&timeinfo));
+}
+
 void setup()
 {
     // Setup a hw serial connection for communication with the P1 meter and logging (not using inversion)
@@ -362,18 +315,43 @@ void setup()
     // * If you get here you have connected to the WiFi
     Serial.println(F("Connected to WIFI..."));
 
+    setClock(); // Required for X.509 validation
+
+    // * Setup MQTT
+    Serial.printf("Connecting to AWS on: %s\n", AWS_IOT_ENDPOINT);
+
+    // Configure WiFiClientSecure to use the AWS IoT device credentials
+    BearSSL::X509List *cert = new BearSSL::X509List(AWS_CERT_CA);
+    net.setTrustAnchors(cert);
+    BearSSL::X509List *client_crt = new BearSSL::X509List(AWS_CERT_CRT);
+    BearSSL::PrivateKey *key = new BearSSL::PrivateKey(AWS_CERT_PRIVATE);
+    net.setClientRSACert(client_crt, key);
+
+    // Connect to the MQTT broker on the AWS endpoint we defined earlier
+    client.begin(AWS_IOT_ENDPOINT, 8883, net);
+
+    while (!client.connect(THINGNAME)) {
+        Serial.println(client.lastError());
+        delay(400);
+    }
+
+    if(!client.connected()){
+        Serial.println("AWS IoT Timeout!");
+        return;
+    }
+
+    Serial.println("AWS IoT Connected!");
+
+    Serial.println(F("Setting up websocket..."));
     webSocket.begin();
 
     // * Keep LED off
     ticker.detach();
     digitalWrite(LED_BUILTIN, HIGH);
 
-    // * Setup MQTT
-    Serial.printf("MQTT connecting to: %s:%s\n", MQTT_HOST, MQTT_PORT);
-
-    mqtt_client.setServer(MQTT_HOST, atoi(MQTT_PORT));
-
     telegram.reserve(1024);
+
+    Serial.println("Setup done!");
 }
 
 // **********************************
@@ -383,23 +361,6 @@ void setup()
 void loop()
 {    
     long now = millis();
-
-    // if (!mqtt_client.connected())
-    // {
-    //     if (now - LAST_RECONNECT_ATTEMPT > 5000)
-    //     {
-    //         LAST_RECONNECT_ATTEMPT = now;
-
-    //         if (mqtt_reconnect())
-    //         {
-    //             LAST_RECONNECT_ATTEMPT = 0;
-    //         }
-    //     }
-    // }
-    // else
-    // {
-    //     mqtt_client.loop();
-    // }
 
     webSocket.loop();
     

@@ -3,56 +3,43 @@
 // **********************************
 
 // Update treshold in milliseconds, messages will only be sent on this interval
-#define UPDATE_INTERVAL 10000  // 1 minute
-//#define UPDATE_INTERVAL 300000 // 5 minutes
+#define UPDATE_INTERVAL 60000  // 1 minute
 
 // * Baud rate for both hardware and software 
 #define BAUD_RATE 115200
 
-// * The hostname of our little creature
-#define HOSTNAME "p1meter"
-
 // * Wifi timeout in milliseconds
 #define WIFI_TIMEOUT 30000
 
-// * MQTT network settings
-#define MQTT_MAX_RECONNECT_TRIES 10
-
-// * MQTT root topic
-#define MQTT_ROOT_TOPIC "sensors/power/p1meter"
-
-#define MQTT_HOST "192.168.86.7"
-#define MQTT_PORT "1883"
-
-// * MQTT Last reconnection counter
-long LAST_RECONNECT_ATTEMPT = 0;
+// * AWS root topic
+#define AWS_IOT_PUBLISH_TOPIC "p1meter/pub"
 
 long LAST_UPDATE_SENT = 0;
 
 // * Set to store the data values read
-long CONSUMPTION_LOW_TARIF;
-long CONSUMPTION_HIGH_TARIF;
+float CONSUMPTION_LOW_TARIF;
+float CONSUMPTION_HIGH_TARIF;
 
-long RETURNDELIVERY_LOW_TARIF;
-long RETURNDELIVERY_HIGH_TARIF;
+float RETURNDELIVERY_LOW_TARIF;
+float RETURNDELIVERY_HIGH_TARIF;
 
-long ACTUAL_CONSUMPTION;
-long ACTUAL_RETURNDELIVERY;
-long GAS_METER_M3;
+float ACTUAL_CONSUMPTION;
+float ACTUAL_RETURNDELIVERY;
+float GAS_METER_M3;
 
-long L1_INSTANT_POWER_USAGE;
-long L2_INSTANT_POWER_USAGE;
-long L3_INSTANT_POWER_USAGE;
-long L1_INSTANT_POWER_CURRENT;
-long L2_INSTANT_POWER_CURRENT;
-long L3_INSTANT_POWER_CURRENT;
-long L1_VOLTAGE;
-long L2_VOLTAGE;
-long L3_VOLTAGE;
+float L1_INSTANT_POWER_USAGE;
+float L2_INSTANT_POWER_USAGE;
+float L3_INSTANT_POWER_USAGE;
+float L1_INSTANT_POWER_CURRENT;
+float L2_INSTANT_POWER_CURRENT;
+float L3_INSTANT_POWER_CURRENT;
+float L1_VOLTAGE;
+float L2_VOLTAGE;
+float L3_VOLTAGE;
 
 // Set to store data counters read
-long ACTUAL_TARIF;
-long SHORT_POWER_OUTAGES;
-long LONG_POWER_OUTAGES;
-long SHORT_POWER_DROPS;
-long SHORT_POWER_PEAKS;
+float ACTUAL_TARIF;
+float SHORT_POWER_OUTAGES;
+float LONG_POWER_OUTAGES;
+float SHORT_POWER_DROPS;
+float SHORT_POWER_PEAKS;
