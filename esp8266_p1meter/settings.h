@@ -3,7 +3,8 @@
 // **********************************
 
 // Update treshold in milliseconds, messages will only be sent on this interval
-#define UPDATE_INTERVAL 60000  // 1 minute
+#define REMOTE_UPDATE_INTERVAL 60000  // 1 minute
+#define LOCAL_UPDATE_INTERVAL 5000  // 5 seconds
 
 // * Baud rate for both hardware and software 
 #define BAUD_RATE 115200
@@ -18,7 +19,8 @@
 #define AWS_IOT_HEARTBEAT_TOPIC "p1meter/alive"
 #define AWS_IOT_PUBLISH_TOPIC "p1meter/data"
 
-long LAST_UPDATE_SENT = 0;
+long LAST_LOCAL_UPDATE_SENT = 0;
+long LAST_REMOTE_UPDATE_SENT = 0;
 long LAST_HEARTBEAT_SENT = 0;
 
 // * Set to store the data values read

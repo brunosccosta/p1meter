@@ -43,8 +43,8 @@ void tick()
 // * MQTT                           *
 // **********************************
 
-void send_data_to_broker() {
-    Serial.println("Will send data to broker");
+void send_data_to_broker(bool remote) {
+    Serial.println("Sending data..");
 
     StaticJsonDocument<350> doc;
 
@@ -76,19 +76,17 @@ void send_data_to_broker() {
     String buffer;
     serializeJson(doc, buffer);
 
-    webSocket.broadcastTXT(buffer);
-    bool result = client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
-
-    String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
-    webSocket.broadcastTXT(debug);
+    if (remote) {
+        client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
+        // String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
+        // webSocket.broadcastTXT(debug);
+    } else {
+        webSocket.broadcastTXT(buffer);
+    }
 }
 
 void send_heartbeat_to_broker() {
-    webSocket.broadcastTXT("Sending heartbeat to broker\n");
-    bool result = client.publish(AWS_IOT_HEARTBEAT_TOPIC, "1");
-
-    String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
-    webSocket.broadcastTXT(debug);
+    client.publish(AWS_IOT_HEARTBEAT_TOPIC, "1");
 }
 
 // **********************************
@@ -379,9 +377,14 @@ void loop()
     
     read_p1_hardwareserial();
 
-    if (now - LAST_UPDATE_SENT > UPDATE_INTERVAL) {
-        send_data_to_broker();
-        LAST_UPDATE_SENT = millis();
+    if (now - LAST_LOCAL_UPDATE_SENT > LOCAL_UPDATE_INTERVAL) {
+        send_data_to_broker(false);
+        LAST_LOCAL_UPDATE_SENT = millis();
+    }
+
+    if (now - LAST_REMOTE_UPDATE_SENT > REMOTE_UPDATE_INTERVAL) {
+        send_data_to_broker(true);
+        LAST_REMOTE_UPDATE_SENT = millis();
     }
 
     if (now - LAST_HEARTBEAT_SENT > MQTT_HEARTBEAT) {
