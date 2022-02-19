@@ -5,7 +5,7 @@ services:
     ports:
       - '8086:8086'
     volumes:
-      - influxdb-storage:/var/lib/influxdb
+      - /var/local/influx-data:/var/lib/influxdb
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
@@ -18,7 +18,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - /var/local/grafana-data:/var/lib/grafana
     depends_on:
       - influxdb
     environment:
@@ -36,6 +36,3 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - DATABASE_HOST=influxdb
       - DATABASE=sensors
-volumes:
-  influxdb-storage:
-  grafana-storage:
