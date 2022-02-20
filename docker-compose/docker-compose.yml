@@ -39,3 +39,12 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - DATABASE_HOST=influxdb
       - DATABASE=sensors
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - /home/pi/p1meter/docker-compose/conf/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /var/local/mqtt-data:/mosquitto/data/
