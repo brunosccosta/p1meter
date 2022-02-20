@@ -74,6 +74,10 @@ void send_data_to_broker() {
     String buffer;
     serializeJson(doc, buffer);
 
+    if (!client.connected()) {
+        connect_mqtt();
+    }
+
     client.publish(MQTT_PUBLISH_TOPIC, buffer);
     // String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
     // webSocket.broadcastTXT(debug);
@@ -262,6 +266,19 @@ void read_p1_hardwareserial()
     }
 }
 
+void connect_mqtt() {
+    client.begin(mqttIp, net);
+
+    while (!client.connect(THINGNAME)) {
+        Serial.println(client.lastError());
+        delay(400);
+    }
+
+    if(!client.connected()){
+        Serial.println("MQTT Timeout!");
+    }
+}
+
 // **********************************
 // * Setup Main                     *
 // **********************************
@@ -298,17 +315,7 @@ void setup()
     Serial.println(F("Connected to WIFI..."));
 
     // Connect to the MQTT broker
-    client.begin(mqttIp, net);
-
-    while (!client.connect(THINGNAME)) {
-        Serial.println(client.lastError());
-        delay(400);
-    }
-
-    if(!client.connected()){
-        Serial.println("MQTT Timeout!");
-        return;
-    }
+    connect_mqtt();
 
     Serial.println("MQTT Connected!");
 
