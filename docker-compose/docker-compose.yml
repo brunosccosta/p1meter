@@ -2,6 +2,7 @@ version: '3.5'
 services:
   influxdb:
     image: influxdb:latest
+    restart: unless-stopped
     ports:
       - '8086:8086'
     volumes:
@@ -15,6 +16,7 @@ services:
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
   grafana:
     image: grafana/grafana:latest
+    restart: unless-stopped
     ports:
       - '3000:3000'
     volumes:
@@ -26,6 +28,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
   influx_backup:
     build: ./influx-backup
+    restart: unless-stopped
     depends_on:
       - influxdb
     environment:
