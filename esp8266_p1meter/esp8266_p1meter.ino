@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 #include <Ticker.h>
-#include <time.h>
 #include <ArduinoJson.h>
 
 #include <WiFiManager.h>
@@ -12,16 +11,15 @@
 #include <MQTTClient.h>
 
 #include "settings.h"
-#include "secrets.h"
 
 // * Initiate led blinker library
 Ticker ticker;
 
-// * Initiate WIFI client
-WiFiClientSecure net = WiFiClientSecure();
+WiFiClient net;
 
 // * Initiate MQTT client
 MQTTClient client = MQTTClient(1024);
+IPAddress mqttIp(192, 168, 86, 7);
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 
@@ -43,7 +41,7 @@ void tick()
 // * MQTT                           *
 // **********************************
 
-void send_data_to_broker(bool remote) {
+void send_data_to_broker() {
     Serial.println("Sending data..");
 
     StaticJsonDocument<350> doc;
@@ -76,17 +74,10 @@ void send_data_to_broker(bool remote) {
     String buffer;
     serializeJson(doc, buffer);
 
-    if (remote) {
-        client.publish(AWS_IOT_PUBLISH_TOPIC, buffer);
-        // String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
-        // webSocket.broadcastTXT(debug);
-    } else {
-        webSocket.broadcastTXT(buffer);
-    }
-}
-
-void send_heartbeat_to_broker() {
-    client.publish(AWS_IOT_HEARTBEAT_TOPIC, "1");
+    client.publish(MQTT_PUBLISH_TOPIC, buffer);
+    // String debug = String(result) + " - " + client.returnCode() + " - " + client.lastError() + "\n\n";
+    // webSocket.broadcastTXT(debug);
+    webSocket.broadcastTXT(buffer);
 }
 
 // **********************************
@@ -275,24 +266,6 @@ void read_p1_hardwareserial()
 // * Setup Main                     *
 // **********************************
 
-void setClock()
-{
-    configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-
-    Serial.print("Waiting for NTP time sync: ");
-    time_t now = time(nullptr);
-    while (now < 8 * 3600 * 2) {
-        delay(500);
-        Serial.print(".");
-        now = time(nullptr);
-    }
-    Serial.println("");
-    struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
-    Serial.print("Current time: ");
-    Serial.print(asctime(&timeinfo));
-}
-
 void setup()
 {
     // Setup a hw serial connection for communication with the P1 meter and logging (not using inversion)
@@ -324,22 +297,8 @@ void setup()
     // * If you get here you have connected to the WiFi
     Serial.println(F("Connected to WIFI..."));
 
-    setClock(); // Required for X.509 validation
-
-    // * Setup MQTT
-    Serial.printf("Connecting to AWS on: %s\n", AWS_IOT_ENDPOINT);
-
-    // Configure WiFiClientSecure to use the AWS IoT device credentials
-    BearSSL::X509List *cert = new BearSSL::X509List(AWS_CERT_CA);
-    net.setTrustAnchors(cert);
-    BearSSL::X509List *client_crt = new BearSSL::X509List(AWS_CERT_CRT);
-    BearSSL::PrivateKey *key = new BearSSL::PrivateKey(AWS_CERT_PRIVATE);
-    net.setClientRSACert(client_crt, key);
-
-    net.setTimeout(120);
-
-    // Connect to the MQTT broker on the AWS endpoint we defined earlier
-    client.begin(AWS_IOT_ENDPOINT, 8883, net);
+    // Connect to the MQTT broker
+    client.begin(mqttIp, net);
 
     while (!client.connect(THINGNAME)) {
         Serial.println(client.lastError());
@@ -347,11 +306,11 @@ void setup()
     }
 
     if(!client.connected()){
-        Serial.println("AWS IoT Timeout!");
+        Serial.println("MQTT Timeout!");
         return;
     }
 
-    Serial.println("AWS IoT Connected!");
+    Serial.println("MQTT Connected!");
 
     Serial.println(F("Setting up websocket..."));
     webSocket.begin();
@@ -377,18 +336,8 @@ void loop()
     
     read_p1_hardwareserial();
 
-    if (now - LAST_LOCAL_UPDATE_SENT > LOCAL_UPDATE_INTERVAL) {
-        send_data_to_broker(false);
-        LAST_LOCAL_UPDATE_SENT = millis();
-    }
-
-    if (now - LAST_REMOTE_UPDATE_SENT > REMOTE_UPDATE_INTERVAL) {
-        send_data_to_broker(true);
-        LAST_REMOTE_UPDATE_SENT = millis();
-    }
-
-    if (now - LAST_HEARTBEAT_SENT > MQTT_HEARTBEAT) {
-        send_heartbeat_to_broker();
-        LAST_HEARTBEAT_SENT = millis();
+    if (now - LAST_UPDATE_SENT > UPDATE_INTERVAL) {
+        send_data_to_broker();
+        LAST_UPDATE_SENT = millis();
     }
 }

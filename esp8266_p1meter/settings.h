@@ -3,8 +3,7 @@
 // **********************************
 
 // Update treshold in milliseconds, messages will only be sent on this interval
-#define REMOTE_UPDATE_INTERVAL 60000  // 1 minute
-#define LOCAL_UPDATE_INTERVAL 5000  // 5 seconds
+#define UPDATE_INTERVAL 5000  // 5 seconds
 
 // * Baud rate for both hardware and software 
 #define BAUD_RATE 115200
@@ -12,16 +11,12 @@
 // * Wifi timeout in milliseconds
 #define WIFI_TIMEOUT 30000
 
-// * Heartbeat in milliseconds
-#define MQTT_HEARTBEAT 10000
+// * MQTT topic
+#define MQTT_PUBLISH_TOPIC "p1meter/data"
 
-// * AWS root topic
-#define AWS_IOT_HEARTBEAT_TOPIC "p1meter/alive"
-#define AWS_IOT_PUBLISH_TOPIC "p1meter/data"
+long LAST_UPDATE_SENT = 0;
 
-long LAST_LOCAL_UPDATE_SENT = 0;
-long LAST_REMOTE_UPDATE_SENT = 0;
-long LAST_HEARTBEAT_SENT = 0;
+#define THINGNAME "p1meter"
 
 // * Set to store the data values read
 float CONSUMPTION_LOW_TARIF;
