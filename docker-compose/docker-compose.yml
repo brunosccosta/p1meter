@@ -42,9 +42,21 @@ services:
   mqtt:
     container_name: mqtt
     image: eclipse-mosquitto:latest
+    restart: unless-stopped
     ports:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - /home/pi/p1meter/docker-compose/conf/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /home/pi/p1meter/docker-compose/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /var/local/mqtt-data:/mosquitto/data/
+  telegraf:
+    container_name: telegraf
+    image: telegraf:latest
+    restart: unless-stopped
+    depends_on:
+      - mqtt
+      - influxdb
+    environment:
+      - INFLUX_TOKEN=${INFLUXDB_TOKEN}
+    volumes:
+      - /home/pi/p1meter/docker-compose/conf/telegraf.conf:/etc/telegraf/telegraf.conf
