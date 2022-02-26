@@ -4,9 +4,7 @@ services:
     build: .
     restart: unless-stopped
     volumes:
-      - /home/pi/p1meter/bluetooth/conf/mqtt.ini:/app/mqtt.ini:ro
-      - /home/pi/p1meter/bluetooth/conf/devices.ini:/app/devices.ini:ro
+      - /home/pi/p1meter/bluetooth/conf/mqtt.ini:/conf/mqtt.ini:ro
+      - /home/pi/p1meter/bluetooth/conf/devices.ini:/conf/devices.ini:ro
     network_mode: "host"
     privileged: true
-    environment:
-      - CRON=* * * * *
