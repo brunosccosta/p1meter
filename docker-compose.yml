@@ -85,3 +85,16 @@ services:
       - CODE=${NEST_CODE}
       - REFRESH_TOKEN=${NEST_REFRESH_TOKEN}
       - DEVICE_NAME=${NEST_DEVICE_NAME}
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    image: koenkk/zigbee2mqtt
+    volumes:
+      - /home/pi/smarthouse/conf/zigbee-conf.yaml:/app/data/configuration.yaml
+      - /run/udev:/run/udev:ro
+    ports:
+      - 8088:8088
+    environment:
+      - TZ=Europe/Amsterdam
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
