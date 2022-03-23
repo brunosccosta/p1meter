@@ -32,7 +32,7 @@ class Nest:
         self.__refresh_token = response_json['refresh_token']
 
     def __refresh_access_token(self):
-        if ( (time.time() - self.__access_token_last_update) / 60 < self.__expires_in ):
+        if ( (int(time.time()) - self.__access_token_last_update) / 60 < self.__expires_in ):
             return
 
         params = (
@@ -47,7 +47,7 @@ class Nest:
         response_json = response.json()
         self.__access_token = response_json['token_type'] + ' ' + response_json['access_token']
         self.__expires_in = response_json['expires_in']
-        self.__access_token_last_update = time.time()
+        self.__access_token_last_update = int(time.time())
 
     def get_stats(self):
         self.__refresh_access_token()
@@ -72,10 +72,10 @@ class Nest:
         }
 
     def set_eco_on(self):
-        self.__set_eco_mode('MANUAL_ECO')
+        return self.__set_eco_mode('MANUAL_ECO')
 
     def set_eco_off(self):
-        self.__set_eco_mode('OFF')
+        return self.__set_eco_mode('OFF')
 
     def __set_eco_mode(self, mode):
         self.__refresh_access_token()
@@ -91,4 +91,4 @@ class Nest:
 
         response = requests.post(url_set_mode, headers=headers, data=data)
 
-        print(response.json())
+        return response.json()

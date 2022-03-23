@@ -98,3 +98,9 @@ services:
       - TZ=Europe/Amsterdam
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
+  nest-controller:
+    build: ./nest-controller
+    restart: unless-stopped
+    depends_on:
+      - nest-flask
+      - zigbee2mqtt
