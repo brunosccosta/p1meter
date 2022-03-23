@@ -43,11 +43,13 @@ services:
     container_name: mqtt
     image: eclipse-mosquitto:latest
     restart: unless-stopped
+    depends_on:
+      - influxdb
     ports:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - /home/pi/p1meter/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /home/pi/smarthouse/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /var/local/mqtt-data:/mosquitto/data/
   telegraf:
     container_name: telegraf
@@ -59,13 +61,13 @@ services:
     environment:
       - INFLUX_TOKEN=${INFLUXDB_TOKEN}
     volumes:
-      - /home/pi/p1meter/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+      - /home/pi/smarthouse/conf/telegraf.conf:/etc/telegraf/telegraf.conf
   ble-mqtt:
     build: ./ble-sensor
     restart: unless-stopped
     volumes:
-      - /home/pi/p1meter/conf/ble-mqtt.ini:/conf/mqtt.ini
-      - /home/pi/p1meter/conf/ble-devices.ini:/conf/devices.ini
+      - /home/pi/smarthouse/conf/ble-mqtt.ini:/conf/mqtt.ini
+      - /home/pi/smarthouse/conf/ble-devices.ini:/conf/devices.ini
     network_mode: "host"
     privileged: true
   nest-flask:
@@ -76,7 +78,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - /home/pi/p1meter/nest-flask/:/app
+      - /home/pi/smarthouse/nest-flask/:/app
     environment:
       - CLIENT_ID=${NEST_CLIENT_ID}
       - CLIENT_SECRET=${NEST_CLIENT_SECRET}
