@@ -60,3 +60,18 @@ services:
       - INFLUX_TOKEN=${INFLUXDB_TOKEN}
     volumes:
       - /home/pi/p1meter/docker-compose/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+  nest-flask:
+    build: ./nest-flask
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    ports:
+      - "5000:5000"
+    volumes:
+      - /home/pi/p1meter/docker-compose/nest-flask/:/app
+    environment:
+      - CLIENT_ID=${NEST_CLIENT_ID}
+      - CLIENT_SECRET=${NEST_CLIENT_SECRET}
+      - CODE=${NEST_CODE}
+      - REFRESH_TOKEN=${NEST_REFRESH_TOKEN}
+      - DEVICE_NAME=${NEST_DEVICE_NAME}
