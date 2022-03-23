@@ -47,7 +47,7 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - /home/pi/p1meter/docker-compose/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /home/pi/p1meter/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /var/local/mqtt-data:/mosquitto/data/
   telegraf:
     container_name: telegraf
@@ -59,7 +59,15 @@ services:
     environment:
       - INFLUX_TOKEN=${INFLUXDB_TOKEN}
     volumes:
-      - /home/pi/p1meter/docker-compose/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+      - /home/pi/p1meter/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+  ble-mqtt:
+    build: ./ble-sensor
+    restart: unless-stopped
+    volumes:
+      - /home/pi/p1meter/conf/ble-mqtt.ini:/conf/mqtt.ini
+      - /home/pi/p1meter/conf/ble-devices.ini:/conf/devices.ini
+    network_mode: "host"
+    privileged: true
   nest-flask:
     build: ./nest-flask
     restart: unless-stopped
@@ -68,7 +76,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - /home/pi/p1meter/docker-compose/nest-flask/:/app
+      - /home/pi/p1meter/nest-flask/:/app
     environment:
       - CLIENT_ID=${NEST_CLIENT_ID}
       - CLIENT_SECRET=${NEST_CLIENT_SECRET}
