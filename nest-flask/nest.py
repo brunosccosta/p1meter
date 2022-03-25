@@ -32,7 +32,7 @@ class Nest:
         self.__refresh_token = response_json['refresh_token']
 
     def __refresh_access_token(self):
-        if ( (int(time.time()) - self.__access_token_last_update) / 60 < self.__expires_in ):
+        if ( time.time() - self.__access_token_last_update < self.__expires_in ):
             return
 
         params = (

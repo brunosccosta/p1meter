@@ -4,7 +4,7 @@ import requests
 import threading
 
 nest_flask_url = "http://nest-flask:5000"
-delay_door_open_in_seconds = 10
+delay_door_open_in_seconds = 60
 turn_on_thread = None
 
 def turn_eco_on():
