@@ -76,24 +76,12 @@ backup() {
 
   # Push backup file to S3
   echo "Sending file to S3"
-  if aws s3 rm s3://${S3_BUCKET}/${S3_KEY_PREFIX}latest.tgz; then
-    echo "Removed latest backup from S3"
-  else
-    echo "No latest backup exists in S3"
-  fi
-  if aws s3 cp $BACKUP_ARCHIVE_PATH s3://${S3_BUCKET}/${S3_KEY_PREFIX}latest.tgz; then
-    echo "Backup file copied to s3://${S3_BUCKET}/${S3_KEY_PREFIX}latest.tgz"
+  if aws s3 cp $BACKUP_ARCHIVE_PATH s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz --storage-class DEEP_ARCHIVE; then
+    echo "Backup file copied to s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz"
   else
     echo "Backup file failed to upload"
     exit 1
   fi
-  if aws s3api copy-object --copy-source ${S3_BUCKET}/${S3_KEY_PREFIX}latest.tgz --key ${S3_KEY_PREFIX}${DATETIME}.tgz --bucket $S3_BUCKET; then
-    echo "Backup file copied to s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz"
-  else
-    echo "Failed to create timestamped backup"
-    exit 1
-  fi
-
   echo "Done"
 }
 
