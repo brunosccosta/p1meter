@@ -1,0 +1,911 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          },
+          "displayName": "-",
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "color": "light-blue",
+                  "index": 1,
+                  "text": "LO"
+                },
+                "2": {
+                  "color": "light-yellow",
+                  "index": 0,
+                  "text": "HI"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 10,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 2,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "none"
+        }
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"actual_tarif_group\")\n  |> drop(fn: (column) => column =~ /(host|topic)/)\n  |> aggregateWindow(every: 1h, fn: max)",
+          "refId": "A"
+        }
+      ],
+      "title": "Tarifa atual",
+      "type": "status-history"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gas_meter_m3"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "m3"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 9,
+        "x": 10,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"actual_consumption\")\n  |> drop(fn: (column) => column =~ /(host|topic)/)\n  |> aggregateWindow(every: 1m, fn: max)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"gas_meter_m3\")\n  |> drop(fn: (column) => column =~ /(host|topic)/)\n  |> aggregateWindow(every: 1m, fn: max)\n  |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }))\n  |> derivative(unit: 1m)\n  ",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": "1h",
+      "title": "Consumo",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1500
+              }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gas_meter_m3"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "m3/h"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "#EAB839",
+                      "value": 0.3
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              },
+              {
+                "id": "displayName",
+                "value": "Gas"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "actual_consumption"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Energia"
+              },
+              {
+                "id": "decimals"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 19,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"actual_consumption\")\n  |> tail(n: 1)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"gas_meter_m3\")\n  |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }))\n  |> aggregateWindow(every: 30m, fn: max)\n  |> fill(column: \"_value\", usePrevious: true)\n  |> derivative(unit: 30m)\n  |> tail(n: 1)",
+          "refId": "B"
+        }
+      ],
+      "title": "Consumo atual",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          },
+          "decimals": 2,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyEUR"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Energia"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p1meter p1meter {host=\"3a91a394c815\", topic=\"p1meter/data\"}"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Gas"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 10,
+        "x": 0,
+        "y": 3
+      },
+      "hideTimeOverride": true,
+      "id": 15,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": true,
+          "query": "from(bucket: \"sensors-downsampled\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"consumption_low_tarif\")\n  |> aggregateWindow(every: 1d, fn: last)\n  |> derivative(unit: 1d)\n  |> map(fn: (r) => ({ r with _value: r._value * 0.00015 }))\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": true,
+          "query": "from(bucket: \"sensors-downsampled\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"consumption_high_tarif\")\n  |> drop(fn: (column) => column =~ /(host|topic)/)\n  |> aggregateWindow(every: 1d, fn: last)\n  |> derivative(unit: 1d)\n  |> map(fn: (r) => ({ r with _value: r._value * 0.000165 }))\n",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"sensors-downsampled\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"p1meter\")\n  |> filter(fn: (r) => r[\"_field\"] == \"gas_meter_m3\")\n  |> map(fn: (r) => ({ r with _value: r._value / 1000.0 }))\n  |> aggregateWindow(every: 1d, fn: last)\n  |> derivative(unit: 1d)\n  |> map(fn: (r) => ({ r with _value: r._value * 0.807 }))",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$A + $B",
+          "hide": false,
+          "refId": "D",
+          "type": "math"
+        }
+      ],
+      "timeFrom": "4d",
+      "title": "Custo Energia €",
+      "type": "status-history"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 35,
+          "min": 10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 18
+              },
+              {
+                "color": "light-orange",
+                "value": 21
+              },
+              {
+                "color": "light-red",
+                "value": 23
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "varanda"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "light-blue",
+                      "value": null
+                    },
+                    {
+                      "color": "light-green",
+                      "value": 10
+                    },
+                    {
+                      "color": "light-yellow",
+                      "value": 25
+                    },
+                    {
+                      "color": "light-orange",
+                      "value": 30
+                    },
+                    {
+                      "color": "light-red",
+                      "value": 35
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "max",
+                "value": 40
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 10,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 13,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"quarto\")\n  |> aggregateWindow(every: 5m, fn: mean)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"quarto\" }))\n  |> tail(n:1)",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"sala\")\n  |> aggregateWindow(every: 5m, fn: mean)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"escritorio\" }))\n  |> tail(n:1)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"banheiro\")\n  |> aggregateWindow(every: 5m, fn: mean)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"banheiro\" }))\n  |> tail(n:1)",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"varanda\")\n  |> aggregateWindow(every: 5m, fn: mean)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"varanda\" }))\n  |> tail(n:1)",
+          "refId": "D"
+        }
+      ],
+      "timeFrom": "10m",
+      "title": "Casa",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 35,
+          "min": 10,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 18
+              },
+              {
+                "color": "light-orange",
+                "value": 21
+              },
+              {
+                "color": "light-red",
+                "value": 23
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "temperature"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Temperatura"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "setpoint"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Setpoint"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 15,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 8,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nest\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> tail(n:1)",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nest\")\n  |> filter(fn: (r) => r[\"_field\"] == \"setpoint\")\n  |> tail(n:1)",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": "10m",
+      "title": "Nest",
+      "type": "gauge"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              },
+              {
+                "color": "light-green",
+                "value": 10
+              },
+              {
+                "color": "light-yellow",
+                "value": 20
+              },
+              {
+                "color": "light-orange",
+                "value": 30
+              },
+              {
+                "color": "light-red",
+                "value": 35
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 6
+      },
+      "hideTimeOverride": true,
+      "id": 12,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "none"
+        }
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"varanda\")\n  |> aggregateWindow(every: 1d, fn: max)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\"-\" }))\n  |> limit(n: 3)\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"thermometer\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"sensor\"] == \"varanda\")\n  |> aggregateWindow(every: 1d, fn: min)\n  |> map(fn: (r) => ({ _value:r._value, _time:r._time, _field:\" \" }))\n  |> limit(n: 3)",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": "3d",
+      "title": "Varanda",
+      "type": "status-history"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          },
+          "mappings": [
+            {
+              "options": {
+                "HEATING": {
+                  "color": "light-red",
+                  "index": 1,
+                  "text": "HEAT"
+                },
+                "MANUAL_ECO": {
+                  "color": "light-blue",
+                  "index": 0,
+                  "text": "ECO"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "eco"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Eco"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 10,
+        "x": 0,
+        "y": 8
+      },
+      "hideTimeOverride": true,
+      "id": 10,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "hidden",
+          "placement": "bottom"
+        },
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "pluginVersion": "8.3.6",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nest\")\n  |> filter(fn: (r) => r[\"_field\"] == \"status\")\n  |> aggregateWindow(every: 1h, fn: last)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "U-C-2cBnk"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telegraf\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nest\")\n  |> filter(fn: (r) => r[\"_field\"] == \"eco\")\n  |> aggregateWindow(every: 1h, fn: last)",
+          "refId": "B"
+        }
+      ],
+      "title": "Nest Status",
+      "type": "status-history"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 34,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Tablet",
+  "uid": "JQPuOml7k",
+  "version": 26,
+  "weekStart": ""
+}

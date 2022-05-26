@@ -76,7 +76,7 @@ backup() {
 
   # Push backup file to S3
   echo "Sending file to S3"
-  if aws s3 cp $BACKUP_ARCHIVE_PATH s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz --storage-class DEEP_ARCHIVE; then
+  if /usr/local/bin/aws s3 cp $BACKUP_ARCHIVE_PATH s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz --storage-class DEEP_ARCHIVE; then
     echo "Backup file copied to s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz"
   else
     echo "Backup file failed to upload"
