@@ -20,7 +20,7 @@ export BACKUP_PATH=${BACKUP_PATH:-/data/influxdb/backup}
 export BACKUP_ARCHIVE_PATH=${BACKUP_ARCHIVE_PATH:-${BACKUP_PATH}.tgz}
 export DATABASE_HOST=${DATABASE_HOST:-localhost}
 export DATABASE_PORT=${DATABASE_PORT:-8086}
-export CRON=${CRON:-"0 1 * * *"}
+export CRON=${CRON:-"0 0 * * 0"}
 # export CRON=${CRON:-"* * * * *"}
 export DATETIME=$(date "+%Y%m%d%H%M%S")
 
