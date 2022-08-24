@@ -104,3 +104,10 @@ services:
     depends_on:
       - nest-flask
       - zigbee2mqtt
+  tapo:
+    build: ./tapo
+    restart: unless-stopped
+    depends_on:
+      - mqtt
+    environment:
+      - TAPO_PASSWORD=${TAPO_PASSWORD}
