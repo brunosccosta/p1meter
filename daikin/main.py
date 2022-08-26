@@ -41,9 +41,9 @@ class Daikin:
             data['room_temp'] = sensors["roomTemperature"]["value"]
             data['room_hum'] = sensors["roomHumidity"]["value"]
 
-            setpoint = mp_data["temperatureControl"]["value"]["operationModes"][operation]
-            if setpoint:
-                data['setpoint'] = setpoint["setpoints"]["roomTemperature"]["value"]
+            setpoints = mp_data["temperatureControl"]["value"]["operationModes"]
+            if operation in setpoints:
+                data['setpoint'] = setpoints[operation]["setpoints"]["roomTemperature"]["value"]
 
         return json.dumps(data)
 
@@ -85,7 +85,7 @@ username = config_parser['app']['username']
 password = config_parser['app']['password']
 uuid = config_parser['app']['uuid']
 name = config_parser['app']['name']
-polling = config_parser['app']['polling_seconds']
+polling = int(config_parser['app']['polling_seconds'])
 
 username = read_value_or_env_variable(username)
 password = read_value_or_env_variable(password)
