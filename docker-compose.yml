@@ -111,3 +111,10 @@ services:
       - mqtt
     environment:
       - TAPO_PASSWORD=${TAPO_PASSWORD}
+  daikin:
+    build: ./daikin
+    restart: unless-stopped
+    depends_on:
+      - mqtt
+    environment:
+      - DAIKIN_PASSWORD=${DAIKIN_PASSWORD}
