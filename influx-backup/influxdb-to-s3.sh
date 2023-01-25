@@ -23,6 +23,7 @@ export DATABASE_PORT=${DATABASE_PORT:-8086}
 export CRON=${CRON:-"0 0 * * 0"}
 # export CRON=${CRON:-"* * * * *"}
 export DATETIME=$(date "+%Y%m%d%H%M%S")
+export CLEANUP_THRESHOLD="3 months"
 
 # Add this script to the crontab and start crond
 startcron() {
@@ -38,6 +39,7 @@ startcron() {
   echo "export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $HOME/.profile
   echo "export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $HOME/.profile
   echo "export INFLUXDB_TOKEN=$INFLUXDB_TOKEN" >> $HOME/.profile
+  echo "export CLEANUP_THRESHOLD=$CLEANUP_THRESHOLD" >> $HOME/.profile
   echo "Starting backup cron job with frequency '$1'"
 
   echo "$1 . $HOME/.profile; $0 backup >> /var/log/cron.log 2>&1" > /etc/cron.d/influxdbbackup
@@ -78,11 +80,30 @@ backup() {
   echo "Sending file to S3"
   if /usr/local/bin/aws s3 cp $BACKUP_ARCHIVE_PATH s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz --storage-class DEEP_ARCHIVE; then
     echo "Backup file copied to s3://${S3_BUCKET}/${S3_KEY_PREFIX}${DATETIME}.tgz"
+    cleanup
   else
     echo "Backup file failed to upload"
     exit 1
   fi
   echo "Done"
+}
+
+cleanup() {
+  /usr/local/bin/aws s3 ls s3://${S3_BUCKET} | while read -r line;
+  do
+    createDate=`echo $line|awk {'print $1" "$2'}`
+    createDate=$(date -d "$createDate" "+%s")
+    olderThan=$(date -d "${CLEANUP_THRESHOLD} ago" "+%s")
+    if [[ $createDate -le $olderThan ]];
+      then
+        fileName=`echo $line|awk {'print $4'}`
+        if [ $fileName != "" ]
+          then
+            printf 'Deleting "%s"\n' $fileName
+            /usr/local/bin/aws s3 rm "$fileName"
+        fi
+    fi
+  done;
 }
 
 # Handle command line arguments
@@ -93,7 +114,10 @@ case "$1" in
   "backup")
     backup
     ;;
+  "cleanup")
+    cleanup
+    ;;
   *)
     echo "Invalid command '$@'"
-    echo "Usage: $0 {backup|startcron}"
+    echo "Usage: $0 {backup|cleanup|startcron}"
 esac
