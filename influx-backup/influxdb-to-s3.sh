@@ -100,7 +100,7 @@ cleanup() {
         if [ $fileName != "" ]
           then
             printf 'Deleting "%s"\n' $fileName
-            /usr/local/bin/aws s3 rm "$fileName"
+            /usr/local/bin/aws s3 rm "s3://${S3_BUCKET}/$fileName"
         fi
     fi
   done;

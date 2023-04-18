@@ -3,6 +3,7 @@ import time
 import json
 import re
 import os
+import sys
 import configparser
 import logging
 
@@ -95,6 +96,10 @@ sensors = create_sensors_from_config()
 
 while True:
     for sensor in sensors:
-        mqtt.send(sensor.read())
+        try:
+            mqtt.send(sensor.read())
+        except:
+            logging.info("Error reading data from sensors. Will exit")
+            sys.exit(13)
     
-    time.sleep(2)
+    time.sleep(5)

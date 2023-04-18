@@ -96,5 +96,10 @@ api.retrieveAccessToken()
 airco = Daikin(api, uuid, name)
 
 while True:
-    mqtt.send(airco.read())
+    try:
+        mqtt.send(airco.read())
+    except:
+        logging.info("Error reading data from daikin. Will exit")
+        sys.exit(13)
+    
     time.sleep(polling)
