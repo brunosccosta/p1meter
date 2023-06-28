@@ -118,3 +118,8 @@ services:
       - mqtt
     environment:
       - DAIKIN_PASSWORD=${DAIKIN_PASSWORD}
+  epex:
+    build: ./epex
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
