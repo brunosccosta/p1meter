@@ -1,0 +1,97 @@
+[
+    {
+        "name": "Hombli Smart Socket Duo",
+        "id": "bfce63efa22f3c39d8nfkv",
+        "key": "lZ&'FKKg}F+_/JXq",
+        "mac": "a0:92:08:82:30:7c",
+        "uuid": "a9ad8101a715f753",
+        "sn": "NX2207211000453",
+        "category": "pc",
+        "product_name": "Hombli Smart Socket Duo ",
+        "product_id": "r9mzzp5walpduasm",
+        "biz_type": 0,
+        "model": "HBSD-0109-V3",
+        "sub": false,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay1554288005676QBjh1/0921aae4518279568a1e26bbe3fde54e.jpg",
+        "mapping": {
+            "1": {
+                "code": "switch_1",
+                "type": "Boolean",
+                "values": {}
+            },
+            "2": {
+                "code": "switch_2",
+                "type": "Boolean",
+                "values": {}
+            },
+            "9": {
+                "code": "countdown_1",
+                "type": "Integer",
+                "values": {
+                    "unit": "s",
+                    "min": 0,
+                    "max": 86400,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "10": {
+                "code": "countdown_2",
+                "type": "Integer",
+                "values": {
+                    "unit": "s",
+                    "min": 0,
+                    "max": 86400,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "17": {
+                "code": "add_ele",
+                "type": "Integer",
+                "values": {
+                    "unit": "kwh",
+                    "min": 0,
+                    "max": 50000,
+                    "scale": 3,
+                    "step": 100
+                }
+            },
+            "18": {
+                "code": "cur_current",
+                "type": "Integer",
+                "values": {
+                    "unit": "mA",
+                    "min": 0,
+                    "max": 30000,
+                    "scale": 0,
+                    "step": 1
+                }
+            },
+            "19": {
+                "code": "cur_power",
+                "type": "Integer",
+                "values": {
+                    "unit": "W",
+                    "min": 0,
+                    "max": 80000,
+                    "scale": 1,
+                    "step": 1
+                }
+            },
+            "20": {
+                "code": "cur_voltage",
+                "type": "Integer",
+                "values": {
+                    "unit": "V",
+                    "min": 0,
+                    "max": 5000,
+                    "scale": 1,
+                    "step": 1
+                }
+            }
+        },
+        "ip": "192.168.86.31",
+        "version": "3.3"
+    }
+]

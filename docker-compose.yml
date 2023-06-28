@@ -111,6 +111,12 @@ services:
       - mqtt
     environment:
       - TAPO_PASSWORD=${TAPO_PASSWORD}
+  tuya:
+    build: ./tuya
+    restart: unless-stopped
+    depends_on:
+      - mqtt
+    network_mode: "host"
   daikin:
     build: ./daikin
     restart: unless-stopped
