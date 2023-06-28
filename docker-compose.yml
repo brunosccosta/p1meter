@@ -15,7 +15,7 @@ services:
       - DOCKER_INFLUXDB_INIT_BUCKET=telegraf
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:8.3.6
     restart: unless-stopped
     ports:
       - '3000:3000'
@@ -49,11 +49,11 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - /home/pi/smarthouse/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /home/bruno/smarthouse/conf/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /var/local/mqtt-data:/mosquitto/data/
   telegraf:
     container_name: telegraf
-    image: telegraf:latest
+    image: telegraf:1.21.4-alpine
     restart: unless-stopped
     depends_on:
       - mqtt
@@ -61,13 +61,12 @@ services:
     environment:
       - INFLUX_TOKEN=${INFLUXDB_TOKEN}
     volumes:
-      - /home/pi/smarthouse/conf/telegraf.conf:/etc/telegraf/telegraf.conf
+      - /home/bruno/smarthouse/conf/telegraf.conf:/etc/telegraf/telegraf.conf
   ble-mqtt:
     build: ./ble-golang
     restart: unless-stopped
     volumes:
-      - /home/pi/smarthouse/conf/ble-mqtt.ini:/conf/mqtt.ini
-      - /home/pi/smarthouse/conf/ble-devices.ini:/conf/devices.ini
+      - /home/bruno/smarthouse/conf/ble-devices.ini:/app/ble-devices.ini
     network_mode: "host"
     privileged: true
   nest-flask:
@@ -78,7 +77,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - /home/pi/smarthouse/nest-flask/:/app
+      - /home/bruno/smarthouse/nest-flask/:/app
     environment:
       - CLIENT_ID=${NEST_CLIENT_ID}
       - CLIENT_SECRET=${NEST_CLIENT_SECRET}
@@ -90,7 +89,7 @@ services:
     restart: unless-stopped
     image: koenkk/zigbee2mqtt
     volumes:
-      - /home/pi/smarthouse/conf/zigbee-conf.yaml:/app/data/configuration.yaml
+      - /home/bruno/smarthouse/conf/zigbee-conf.yaml:/app/data/configuration.yaml
       - /run/udev:/run/udev:ro
     ports:
       - 8088:8088
