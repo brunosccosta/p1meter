@@ -63,7 +63,7 @@ services:
     volumes:
       - /home/pi/smarthouse/conf/telegraf.conf:/etc/telegraf/telegraf.conf
   ble-mqtt:
-    build: ./ble-sensor
+    build: ./ble-golang
     restart: unless-stopped
     volumes:
       - /home/pi/smarthouse/conf/ble-mqtt.ini:/conf/mqtt.ini
@@ -123,3 +123,8 @@ services:
     restart: unless-stopped
     ports:
       - "5001:5001"
+  epex-history:
+    build: ./epex-history
+    restart: unless-stopped
+    ports:
+      - "8090:8090"    
